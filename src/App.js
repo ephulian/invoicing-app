@@ -18,12 +18,6 @@ function App() {
 		await addDoc(usersRef, { name: newName, age: Number(newAge) });
 	};
 
-	// Read
-	const getUsers = async () => {
-		const data = await getDocs(usersRef);
-		setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-	};
-
 	// Update
 	const updateUser = async (id, age) => {
 		const userDoc = doc(db, 'users', id);
@@ -39,7 +33,13 @@ function App() {
 	};
 
 	// Read
-	useEffect(() => getUsers(), [usersRef]);
+	useEffect(() => {
+		const getUsers = async () => {
+			const data = await getDocs(usersRef);
+			setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+		};
+		getUsers();
+	}, [usersRef]);
 
 	return (
 		<>
