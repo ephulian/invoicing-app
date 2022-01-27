@@ -1,7 +1,7 @@
 import './App.css';
 import { db } from './firebase-config';
 import { React, useEffect, useState } from 'react';
-import { collection, doc, getDocs, addDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 function App() {
 	const [newName, setNewName] = useState('');
@@ -15,16 +15,31 @@ function App() {
 
 	// Create
 	const createUser = async () => {
-		await addDoc(usersRef, { name: newName, age: newAge });
+		await addDoc(usersRef, { name: newName, age: Number(newAge) });
 	};
 
-	useEffect(() => {
-		const getUsers = async () => {
-			const data = await getDocs(usersRef);
-			setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-		};
-		getUsers();
-	}, []);
+	// Read
+	const getUsers = async () => {
+		const data = await getDocs(usersRef);
+		setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+	};
+
+	// Update
+	const updateUser = async (id, age) => {
+		const userDoc = doc(db, 'users', id);
+		const newFields = { age: age + 1 };
+
+		await updateDoc(userDoc, newFields);
+	};
+
+	// Delete
+	const deleteUser = async (id) => {
+		const userDoc = doc(db, 'users', id);
+		await deleteDoc(userDoc);
+	};
+
+	// Read
+	useEffect(() => getUsers(), [usersRef]);
 
 	return (
 		<>
@@ -46,9 +61,23 @@ function App() {
 				<button onClick={createUser}>CREATE USER</button>
 				{users.map((user) => {
 					return (
-						<div>
+						<div style={{ border: '2px solid red', width: '400px', margin: '25px auto' }}>
 							<h1>name:{user.name}</h1>
 							<h1>name:{user.age}</h1>
+							<button
+								onClick={() => {
+									updateUser(user.id, user.age);
+								}}
+							>
+								increase age
+							</button>
+							<button
+								onClick={() => {
+									deleteUser(user.id);
+								}}
+							>
+								Delete User
+							</button>
 						</div>
 					);
 				})}
